@@ -1,0 +1,277 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1rem 0;font-family:var(--font-sans)}
+.tabs{display:flex;gap:6px;margin-bottom:1.2rem;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);font-size:12px;font-weight:500;cursor:pointer;color:var(--color-text-secondary);background:transparent;transition:all 0.15s}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
+.phase-panel{display:none}
+.phase-panel.active{display:block}
+.phase-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:1.2rem}
+.meta-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.meta-label{font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px}
+.meta-val{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.day-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;margin-bottom:8px}
+.day-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.day-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px}
+.day-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.day-type{font-size:11px;color:var(--color-text-secondary);margin-right:auto}
+.day-drills{display:flex;flex-direction:column;gap:4px}
+.drill-row{display:flex;align-items:baseline;gap:8px;font-size:12px;color:var(--color-text-secondary)}
+.drill-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.drill-load{font-size:11px;color:var(--color-text-tertiary);margin-right:auto;white-space:nowrap}
+.intensity-bar{height:4px;border-radius:2px;margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:1rem}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)}
+.leg-dot{width:9px;height:9px;border-radius:2px}
+</style>
+
+<div class="wrap">
+
+<div class="tabs">
+  <button class="tab active" onclick="showPhase(0)">المرحلة 1 — بناء القاعدة</button>
+  <button class="tab" onclick="showPhase(1)">المرحلة 2 — تطوير خاص</button>
+  <button class="tab" onclick="showPhase(2)">المرحلة 3 — قبل البطولة</button>
+  <button class="tab" onclick="showPhase(3)">المرحلة 4 — Taper</button>
+</div>
+
+<div id="p0" class="phase-panel active"></div>
+<div id="p1" class="phase-panel"></div>
+<div id="p2" class="phase-panel"></div>
+<div id="p3" class="phase-panel"></div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#5DCAA5"></div>تقنية</div>
+  <div class="leg"><div class="leg-dot" style="background:#378ADD"></div>قوة</div>
+  <div class="leg"><div class="leg-dot" style="background:#EF9F27"></div>HIIT/VO₂</div>
+  <div class="leg"><div class="leg-dot" style="background:#D85A30"></div>Sparring</div>
+  <div class="leg"><div class="leg-dot" style="background:#7F77DD"></div>تكتيك</div>
+  <div class="leg"><div class="leg-dot" style="background:#B4B2A9"></div>استشفاء</div>
+  <div class="leg"><div class="leg-dot" style="background:#D3D1C7"></div>راحة</div>
+</div>
+</div>
+
+<script>
+const C = {
+  tech: {bg:'#E1F5EE',tc:'#085041',bar:'#5DCAA5'},
+  sc:   {bg:'#E6F1FB',tc:'#0C447C',bar:'#378ADD'},
+  hiit: {bg:'#FAEEDA',tc:'#633806',bar:'#EF9F27'},
+  spar: {bg:'#FAECE7',tc:'#712B13',bar:'#D85A30'},
+  tact: {bg:'#EEEDFE',tc:'#3C3489',bar:'#7F77DD'},
+  rec:  {bg:'#F1EFE8',tc:'#5F5E5A',bar:'#B4B2A9'},
+  rest: {bg:'#F1EFE8',tc:'#888780',bar:'#D3D1C7'}
+};
+
+const phases = [
+  {
+    vol:'65%', int:'20%', tact:'10%',
+    days:[
+      {name:'السبت', type:'tech', label:'تقنية — حجم عالٍ', drills:[
+        {t:'ركلات متنوعة (Dollyo, Naeryo, Yeop)',  load:'200–300 تكرار'},
+        {t:'Footwork drills — تقدم وتراجع وجانبي',  load:'4 × 3 دقائق'},
+        {t:'Combinations (2–3 ركلات متتالية)',       load:'10 × 10 تكرار'},
+        {t:'Core training — Plank / Dead bug',        load:'3 × 45 ثانية'}
+      ], int:35},
+      {name:'الأحد', type:'sc', label:'قوة عامة — S&C', drills:[
+        {t:'Squat (وزن الجسم أو خفيف)',              load:'4 × 10'},
+        {t:'Romanian Deadlift',                       load:'3 × 10'},
+        {t:'Lateral band walk',                       load:'3 × 15 كل جهة'},
+        {t:'Medicine ball rotational throw',          load:'3 × 8'}
+      ], int:55},
+      {name:'الاثنين', type:'rec', label:'استشفاء نشط', drills:[
+        {t:'جري خفيف',                               load:'25 دقيقة 65% HRmax'},
+        {t:'Mobility — ورك وركبة وكاحل',             load:'15 دقيقة'},
+        {t:'Foam rolling',                            load:'10 دقيقة'}
+      ], int:30},
+      {name:'الثلاثاء', type:'tech', label:'تقنية — تكرار وتدفق', drills:[
+        {t:'Shadow sparring',                         load:'5 × 2 دقيقة'},
+        {t:'Kicking accuracy (هدف ثابت)',             load:'3 × 20 ركلة'},
+        {t:'Reaction pad drills',                     load:'4 × 90 ثانية'},
+        {t:'Balance & proprioception',                load:'3 × 30 ثانية'}
+      ], int:40},
+      {name:'الأربعاء', type:'hiit', label:'HIIT — VO₂ Max', drills:[
+        {t:'جري سريع/راحة (30s ON / 30s OFF)',       load:'× 12 تكرار'},
+        {t:'Kick bursts على الكيس',                  load:'20s ON / 20s OFF × 10'},
+        {t:'Jump rope fast',                          load:'3 × 60 ثانية'},
+        {t:'Cool down + تمدد',                        load:'10 دقيقة'}
+      ], int:85},
+      {name:'الخميس', type:'spar', label:'Sparring خفيف', drills:[
+        {t:'Technical sparring (بدون ضغط)',           load:'4 × 2 دقيقة'},
+        {t:'Situational drill — هجوم فقط',            load:'3 × 90 ثانية'},
+        {t:'Distance control games',                  load:'3 × 2 دقيقة'}
+      ], int:50},
+      {name:'الجمعة', type:'rest', label:'راحة كاملة', drills:[
+        {t:'نوم كافٍ 8–9 ساعات',                    load:''},
+        {t:'تغذية وترطيب جيد',                       load:''},
+        {t:'إبعاد عن التدريب',                        load:''}
+      ], int:0}
+    ]
+  },
+  {
+    vol:'52%', int:'33%', tact:'13%',
+    days:[
+      {name:'السبت', type:'tech', label:'تقنية سرعة عالية', drills:[
+        {t:'Speed kicking — أسرع ما يمكن',           load:'5 × 15 ثانية + 30 راحة'},
+        {t:'Combination chains (3–4 ركلات)',          load:'8 × 8 تكرار'},
+        {t:'Mirror drills مع شريك',                   load:'4 × 2 دقيقة'},
+        {t:'Core explosive — V-ups / Hollow hold',    load:'3 × 15'}
+      ], int:65},
+      {name:'الأحد', type:'sc', label:'قوة انفجارية — Power', drills:[
+        {t:'Jump squat',                              load:'4 × 6'},
+        {t:'Box jump',                                load:'4 × 5'},
+        {t:'Olympic lift — Hang clean (خفيف)',        load:'4 × 5'},
+        {t:'Medicine ball slam',                      load:'3 × 10'}
+      ], int:75},
+      {name:'الاثنين', type:'hiit', label:'HIIT متقطع مكثف', drills:[
+        {t:'Taekwondo-specific intervals (ركلات)',    load:'20s / 10s × 16'},
+        {t:'Shuttle run (20م)',                        load:'6 × 4 تكرار'},
+        {t:'Anaerobic bursts على الكيس',             load:'10s max × 12'}
+      ], int:90},
+      {name:'الثلاثاء', type:'tact', label:'تكتيك وقرار', drills:[
+        {t:'Situational sparring (مواقف محددة)',       load:'5 × 90 ثانية'},
+        {t:'Counter-attack drills',                    load:'4 × 2 دقيقة'},
+        {t:'Video analysis + تطبيق فوري',             load:'20 دقيقة'}
+      ], int:55},
+      {name:'الأربعاء', type:'spar', label:'Sparring متوسط–عالٍ', drills:[
+        {t:'Competitive sparring',                     load:'5 × 2 دقيقة'},
+        {t:'Point sparring (نقاط حقيقية)',             load:'3 × 2 دقيقة'},
+        {t:'Reaction + speed focus',                   load:'3 × 90 ثانية'}
+      ], int:80},
+      {name:'الخميس', type:'rec', label:'استشفاء نشط', drills:[
+        {t:'سباحة أو ركوب دراجة خفيف',               load:'25–30 دقيقة'},
+        {t:'Stretching ديناميكي وثابت',               load:'15 دقيقة'},
+        {t:'Ice bath اختياري',                         load:'10 دقيقة'}
+      ], int:25},
+      {name:'الجمعة', type:'rest', label:'راحة كاملة', drills:[
+        {t:'نوم وتغذية',                               load:''},
+        {t:'Mental preparation',                       load:''}
+      ], int:0}
+    ]
+  },
+  {
+    vol:'37%', int:'43%', tact:'17%',
+    days:[
+      {name:'السبت', type:'spar', label:'محاكاة بطولة كاملة', drills:[
+        {t:'Match simulation (3 × 2 دقيقة جولات)',   load:'4–5 مباريات'},
+        {t:'نفس قواعد وأوقات التنافس',                load:'راحة 1 دقيقة بين الجولات'},
+        {t:'تسجيل وتحليل فوري',                       load:''}
+      ], int:95},
+      {name:'الأحد', type:'hiit', label:'HIIT قصير مكثف', drills:[
+        {t:'Kick intervals — أقصى سرعة',             load:'15s / 15s × 12'},
+        {t:'Reactive jumps',                           load:'5 × 6'},
+        {t:'تمدد وتهدئة',                             load:'10 دقيقة'}
+      ], int:88},
+      {name:'الاثنين', type:'rec', label:'استشفاء كامل', drills:[
+        {t:'جري جداً خفيف أو مشي',                   load:'20 دقيقة فقط'},
+        {t:'Mobility كاملة',                           load:'20 دقيقة'},
+        {t:'Mental rehearsal — تصور ذهني',            load:'10 دقيقة'}
+      ], int:20},
+      {name:'الثلاثاء', type:'tact', label:'تكتيك مكثف', drills:[
+        {t:'خطة مواجهة (هجومي / دفاعي / طويل)',      load:'4 × 2 دقيقة لكل نمط'},
+        {t:'Counter-attack vs specific styles',        load:'3 × 90 ثانية'},
+        {t:'مراجعة فيديو خصوم',                       load:'20 دقيقة'}
+      ], int:60},
+      {name:'الأربعاء', type:'spar', label:'Sparring عالي الشدة', drills:[
+        {t:'Competitive sparring full',                load:'5 × 2 دقيقة'},
+        {t:'تركيز على نقاط الضعف',                    load:'3 مواقف محددة'}
+      ], int:90},
+      {name:'الخميس', type:'sc', label:'قوة انفجارية خفيفة', drills:[
+        {t:'Jump squat (وزن خفيف)',                   load:'3 × 5'},
+        {t:'Banded kicks — سرعة',                     load:'3 × 10 كل رجل'},
+        {t:'تمدد عام',                                load:'10 دقيقة'}
+      ], int:50},
+      {name:'الجمعة', type:'rest', label:'راحة كاملة', drills:[
+        {t:'نوم كافٍ جداً',                           load:'9 ساعات'},
+        {t:'تغذية كربوهيدرات',                         load:''},
+        {t:'لا تدريب',                                load:''}
+      ], int:0}
+    ]
+  },
+  {
+    vol:'23%', int:'32%', tact:'33%',
+    days:[
+      {name:'السبت', type:'tech', label:'تنشيط خفيف — Activation', drills:[
+        {t:'Speed kicks خفيفة',                      load:'3 × 10 كل رجل'},
+        {t:'Shadow sparring',                         load:'3 × 90 ثانية'},
+        {t:'Reaction drills',                         load:'5 دقائق'}
+      ], int:40},
+      {name:'الأحد', type:'spar', label:'Sparring خفيف', drills:[
+        {t:'Technical sparring فقط',                  load:'2–3 × 2 دقيقة'},
+        {t:'بدون تلاقٍ قوي',                          load:'شدة 60% فقط'}
+      ], int:55},
+      {name:'الاثنين', type:'rest', label:'راحة كاملة', drills:[
+        {t:'راحة تامة',                               load:''},
+        {t:'نوم وتغذية',                               load:''}
+      ], int:0},
+      {name:'الثلاثاء', type:'tact', label:'تكتيك وخطة البطولة', drills:[
+        {t:'مراجعة خطة المباراة',                     load:'30 دقيقة'},
+        {t:'تصور ذهني للسيناريوهات',                  load:'15 دقيقة'},
+        {t:'تحليل فيديو',                              load:'20 دقيقة'}
+      ], int:30},
+      {name:'الأربعاء', type:'rec', label:'تنشيط نهائي', drills:[
+        {t:'حصة قصيرة جداً (30 دقيقة فقط)',          load:''},
+        {t:'Speed kicks — شعور بالسرعة',             load:'2 × 8 كل رجل'},
+        {t:'تمدد وراحة',                              load:''}
+      ], int:30},
+      {name:'الخميس', type:'rest', label:'راحة كاملة', drills:[
+        {t:'نوم مبكر',                                load:'9+ ساعات'},
+        {t:'وجبة كربوهيدرات جيدة',                    load:''},
+        {t:'لا تدريب نهائياً',                         load:''}
+      ], int:0},
+      {name:'الجمعة', type:'spar', label:'يوم البطولة', drills:[
+        {t:'إحماء 20 دقيقة',                          load:''},
+        {t:'Speed kicks activation',                   load:'2 × 5'},
+        {t:'المباراة',                                 load:'البطولة'}
+      ], int:100}
+    ]
+  }
+];
+
+function showPhase(idx){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.phase-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+
+function buildPhase(ph, idx){
+  const el = document.getElementById('p'+idx);
+  const meta = document.createElement('div');
+  meta.className='phase-meta';
+  meta.innerHTML=`<div class="meta-card"><div class="meta-label">حجم</div><div class="meta-val">${ph.vol}</div></div><div class="meta-card"><div class="meta-label">شدة</div><div class="meta-val">${ph.int}</div></div><div class="meta-card"><div class="meta-label">تكتيك</div><div class="meta-val">${ph.tact}</div></div>`;
+  el.appendChild(meta);
+
+  ph.days.forEach(d=>{
+    const c=C[d.type];
+    const card=document.createElement('div');
+    card.className='day-card';
+    const hdr=document.createElement('div');
+    hdr.className='day-header';
+    hdr.innerHTML=`<span class="day-badge" style="background:${c.bg};color:${c.tc}">${d.label}</span><span class="day-name">${d.name}</span>`;
+    card.appendChild(hdr);
+    const drills=document.createElement('div');
+    drills.className='day-drills';
+    d.drills.forEach(dr=>{
+      const row=document.createElement('div');
+      row.className='drill-row';
+      row.innerHTML=`<span class="drill-dot" style="background:${c.bar}"></span><span style="flex:1;line-height:1.5">${dr.t}</span>${dr.load?`<span class="drill-load">${dr.load}</span>`:''}`;
+      drills.appendChild(row);
+    });
+    card.appendChild(drills);
+    if(d.int>0){
+      const bar=document.createElement('div');
+      bar.className='intensity-bar';
+      bar.style.cssText=`background:var(--color-background-secondary)`;
+      const fill=document.createElement('div');
+      fill.style.cssText=`height:100%;width:${d.int}%;background:${c.bar};border-radius:2px`;
+      bar.appendChild(fill);
+      card.appendChild(bar);
+      const pct=document.createElement('div');
+      pct.style.cssText='font-size:10px;color:var(--color-text-tertiary);margin-top:2px;text-align:right';
+      pct.textContent='شدة '+d.int+'%';
+      card.appendChild(pct);
+    }
+    el.appendChild(card);
+  });
+}
+
+phases.forEach((ph,i)=>buildPhase(ph,i));
+</script>
